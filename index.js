@@ -1,20 +1,33 @@
 const { generateFromEmail, generateUsername } = require("unique-username-generator");
 const path = require('path');
 const fs = require('fs');
-const { exec } = require("child_process");
+const { execSync } = require("child_process");
 
 
 let generateAccounts = async function (count, emailHost, password) {
+
+    let lines = "email,password\n";
+
     for (let i=0; i<count; i++) {
         let username = generateUsername();
         let email = username + '@' + emailHost;
     
+        lines += `${email},${password}\n`;
+
         console.log(`Generate ${i+1} -> ${email}    password:${password}`);
         let command = `zmprov createAccount ${email} ${password} displayName '${username}' givenName ${username} sn '.'`;
         console.log(`Command: ${command}`);
+
+        try {
+            let result =  execSync(command);
+
+        } catch (error) {
+            //console.error("Error: ", error.message);
+        }
         
     }
-    
+
+    return lines;
 }
 
 // Retrieve the command line arguments
@@ -58,5 +71,15 @@ if (argv.n <= 0) {
     return;
 }
 
-generateAccounts(argv.n, argv.h, argv.p);
+(async function () {
+
+    let lines = await generateAccounts(argv.n, argv.h, argv.p);
+
+    console.log(" ");
+    console.log("----------");
+    console.log(" ");
+    console.log(lines);
+
+})();
+
 
